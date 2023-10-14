@@ -1,11 +1,11 @@
 import os
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import fastapi
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from challenge.model import DelayModel
 
@@ -69,6 +69,16 @@ class Flights(BaseModel):
 app = fastapi.FastAPI()
 
 
+def is_request_valid(data_payload: Dict[str, Any]) -> bool:
+    is_valid = False
+    try:
+        Flights.parse_obj(data_payload)
+        is_valid = True
+    except ValidationError as err:
+        print(err)
+    return is_valid
+
+
 async def pickle_fitted_model():
     data_path = Path(os.getcwd(), "data/data.csv")
     data = pd.read_csv(filepath_or_buffer=data_path)
@@ -79,11 +89,10 @@ async def pickle_fitted_model():
 
 @app.on_event("startup")
 async def startup_event():
+    print("Fitting model ...")
     await pickle_fitted_model()
+    print("Model Fitted!")
     print("FastAPI application has started")
-
-
-# Define your API routes and other FastAPI components below
 
 
 @app.get("/health", status_code=200)
@@ -93,9 +102,7 @@ async def get_health() -> dict:
 
 @app.post("/predict", status_code=200)
 async def post_predict(data_payload: Dict[str, List[Dict[str, str]]]) -> dict:
-    try:
-        Flights.parse_obj(data_payload)
-    except Exception:
+    if not is_request_valid(data_payload):
         return fastapi.responses.JSONResponse(
             {"error": "unknown column received"}, status_code=400
         )
