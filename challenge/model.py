@@ -1,5 +1,8 @@
+import os
+import pickle
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import List, Tuple, Union
 
 import numpy as np
@@ -31,7 +34,8 @@ class DayTime(Enum):
 
 class DelayModel:
     def __init__(self):
-        self._model = None  # Model should be saved in this attribute.
+        self.model_path = Path(os.getcwd(), "delay_model.pkl")
+        self._model = self.__load_model()
         self.top_10_features: List[str] = [
             "OPERA_Latin American Wings",
             "MES_7",
@@ -156,6 +160,17 @@ class DelayModel:
                 default_top_10_features[col] = default_top_10_features[col] | data[col]
         return default_top_10_features
 
+    def __save_as_pickle(self, model: LogisticRegression) -> Path:
+        with open(self.model_path, "wb") as model_file:
+            pickle.dump(model, model_file)
+
+    def __load_model(self) -> Union[LogisticRegression, None]:
+        loaded_model = None
+        if self.model_path.is_file():
+            with open(self.model_path, "rb") as model_file:
+                loaded_model = pickle.load(model_file)
+        return loaded_model
+
     def preprocess(
         self, data: pd.DataFrame, target_column: str = None
     ) -> Union[Tuple[pd.DataFrame, pd.DataFrame], pd.DataFrame]:
@@ -200,8 +215,9 @@ class DelayModel:
         reg_model = LogisticRegression(
             class_weight={1: n_y0 / len(y_train), 0: n_y1 / len(y_train)}
         )
-        reg_model.fit(x_train, y_train)
+        reg_model.fit(x_train, np.ravel(y_train))
         self._model = reg_model
+        self.__save_as_pickle(reg_model)
 
     def predict(self, features: pd.DataFrame) -> List[int]:
         """
