@@ -30,8 +30,14 @@ jobs:
       - name: Install Test dependencies
         run: pip install -r requirements-test.txt 
 
-      - name: run Model Unit Tests
+      - name: Run Model Unit Tests
         run: make model-test
       
-      - name: run API Unit Tests
+      - name: Run API Unit Tests
         run: make api-test
+      
+      - name: Install Pylint
+        - run: pip install pylint
+      
+      - name: Pylint scan
+       - run: pylint **/*.py --exit-zero
