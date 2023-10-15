@@ -1,9 +1,9 @@
 name: 'Continuous Delivery'
 
 on:
-  pull_request:
+  push:
     branches:
-      - part-4/ci-cd-integration
+      - main
 
 jobs:
   deploy:
