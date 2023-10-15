@@ -38,5 +38,4 @@ jobs:
           image: gcr.io/latam-challenge-api/delay-api:latest
           service: latam-challenge
           region: us-east1
-          platform: managed
-          allow-unauthenticated: true
+          flags: "--min-instances=1 --cpu=1 --memory=512Mi --port=80 --allow-unauthenticated"
