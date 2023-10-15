@@ -1,0 +1,41 @@
+name: 'Continuous Delivery'
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          credentials_json: '${{ secrets.GCP_CREDS }}'
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Configure docker for GCP
+        run: gcloud auth configure-docker
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: gcr.io/latam-challenge-api/delay-api:latest
+          build-args: |
+            HTTP_PORT=80
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          image: gcr.io/latam-challenge-api/delay-api:latest
+          service: latam-challenge
+          region: us-east1
+          flags: "--min-instances=1 --cpu=1 --memory=512Mi --port=80 --allow-unauthenticated"

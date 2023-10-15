@@ -1,5 +1,7 @@
 import unittest
 import pandas as pd
+from pathlib import Path
+import os
 
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
@@ -28,7 +30,8 @@ class TestModel(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.model = DelayModel()
-        self.data = pd.read_csv(filepath_or_buffer="../data/data.csv")
+        data_path = Path(os.getcwd(),"data/data.csv")
+        self.data = pd.read_csv(filepath_or_buffer=data_path)
         
 
     def test_model_preprocess_for_training(
@@ -90,8 +93,13 @@ class TestModel(unittest.TestCase):
     def test_model_predict(
         self
     ):
-        features = self.model.preprocess(
-            data=self.data
+        features, target = self.model.preprocess(
+            data=self.data, target_column="delay"
+        )
+        
+        self.model.fit(
+            features=features,
+            target=target
         )
 
         predicted_targets = self.model.predict(
