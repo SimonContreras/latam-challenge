@@ -84,10 +84,10 @@ class TestModel(unittest.TestCase):
 
         report = classification_report(target_validation, predicted_target, output_dict=True)
         
-        assert report["1"]["recall"] < 0.60
-        assert report["1"]["f1-score"] < 0.70
-        assert report["0"]["recall"] > 0.60
-        assert report["0"]["f1-score"] > 0.30
+        assert report["0"]["recall"] < 0.60
+        assert report["0"]["f1-score"] < 0.70
+        assert report["1"]["recall"] > 0.60
+        assert report["1"]["f1-score"] > 0.30
 
 
     def test_model_predict(
