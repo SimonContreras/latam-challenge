@@ -1,7 +1,7 @@
 """Fast API module for DelayModel serving on and endpoint: /predict
 """
-import os
 import logging
+import os
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Union
