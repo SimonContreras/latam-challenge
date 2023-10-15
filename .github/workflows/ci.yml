@@ -37,7 +37,7 @@ jobs:
         run: make api-test
       
       - name: Install Pylint
-        - run: pip install pylint
+        run: pip install pylint
       
       - name: Pylint scan
-       - run: pylint **/*.py --exit-zero
+        run: pylint **/*.py --exit-zero
